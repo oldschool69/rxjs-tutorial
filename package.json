@@ -1,0 +1,16 @@
+{
+  "name": "rxjs-tutorial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.88.0",
+    "rxjs": "^6.3.3",
+    "rxjs-compat": "^6.3.3"
+  }
+}
