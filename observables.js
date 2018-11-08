@@ -1,8 +1,58 @@
-const { timer, interval, forkJoin, of, Observable, concat, merge } = require('rxjs');
-const { switchMap, mergeMap, flatMap, delay, take, concatAll, map, mergeAll, tap } = require('rxjs/operators');
+
+const Rx = require('rxjs/Rx');
+const request = require('request');
+const { timer, interval, forkJoin, of, Observable, concat, merge, from } = require('rxjs');
+const { switchMap, mergeMap, flatMap, delay, take, concatAll, map, mergeAll, tap, pluck, toArray, filter } = require('rxjs/operators');
 
 
 
+function zipSample() {
+
+  let age$ = Observable.of(27, 25, 29);
+  let name$ = Observable.of('Foo', 'Bar', 'Beer');
+  let isDev$ = Observable.of(true, true, false); 
+
+  Observable.zip(age$, 
+                 name$,
+                 isDev$, 
+                 (age, name, isDev) => ({age, name, isDev}))
+             .subscribe(x => console.log(x));
+}
+
+function pluckSample() {
+
+  const source$ = Observable.from([
+    { name: 'Joe', age: 30, job: { title: 'Developer', language: 'Javascript' } }, 
+    { name: 'Sarah', age: 35, job: { title: 'Developer', language: 'C++' } },
+    { name: 'Carlos', age: 28, job: { title: 'Designer', language: 'Photo Shop 3' }  }
+  ]);
+
+  source$
+    .filter(employee => employee.job.title === 'Developer')
+    .map(x => {
+      console.log(x.job.title);
+      return x;
+    })
+    .pluck('job', 'language')
+    .toArray()
+    .subscribe(language => console.log(language));
+ 
+}
+
+
+function minSample() {
+  Observable.of(2, 3, 4, -1, 8, -16)
+    .min()
+    .subscribe(x => console.log(x));
+
+
+  // Usign a more complex data type  
+  Observable.of({age: 7, name: 'Foo'},
+                {age: 5, name: 'Bar'},
+                {age: 9, name: 'Beer'})
+            .min((person1, person2) => person1.age < person2.age ? -1 : 1)
+            .subscribe((person) => console.log(person.name));  
+}
 
 
 function switchMapSample() {
@@ -18,7 +68,7 @@ function switchMapSample() {
 function forkJoinSample() {
 
   const $obs1 = Observable.fromPromise(
-    new Promise ( function (resolve, reject) {
+    new Promise(function (resolve, reject) {
       setTimeout(() => {
         resolve('from obs 1!!');
       }, 2000);
@@ -26,7 +76,7 @@ function forkJoinSample() {
   );
 
   const $obs2 = Observable.fromPromise(
-    new Promise ( function (resolve, reject) {
+    new Promise(function (resolve, reject) {
       setTimeout(() => {
         resolve('from obs 2!!');
       }, 4000);
@@ -46,7 +96,7 @@ function forkJoinSample() {
   $sample
     .pipe(
       flatMap(result => result),
-    ).subscribe(val => console.log(val)); 
+    ).subscribe(val => console.log(val));
 
 }
 
@@ -66,8 +116,8 @@ function concatAllSample() {
 
 function mergeAllSample() {
 
-  const myPromise = function(val, timeout) {
-    return new Promise(function(resolve, reject) {
+  const myPromise = function (val, timeout) {
+    return new Promise(function (resolve, reject) {
       setTimeout(() => {
         resolve(`Result: ${val}`);
       }, timeout);
@@ -86,8 +136,111 @@ function mergeAllSample() {
 
 }
 
+function concatSample() {
+  //Juntando streams com Concat e Merge
+
+  const arr1 = [
+    { name: 'Josh', age: 15 },
+    { name: 'Barbara', age: 12 },
+    { name: 'Mike', age: 15 },
+  ];
+
+
+  const arr2 = [
+    { name: 'Michela', age: 14 },
+    { name: 'Katrina', age: 13 },
+    { name: 'Marvin', age: 25 },
+  ];
+
+  // const $obs1 = Rx.Observable.from(arr1);
+  // const $obs2 = Rx.Observable.from(arr2);
+
+  const $obs1 = Rx.Observable.interval(100)
+    .map(val => `Source 1: ${val}`)
+    .take(5);
+
+  const $obs2 = Rx.Observable.interval(100)
+    .map(val => `Source 2: ${val * 10}`)
+    .take(5);
+
+
+  // $obs1
+  //   .concat($obs2) // Junta as streams em sequencia, primeiro os valores de $obs1 e $obs2 em seguida
+  //   .subscribe(value => {
+  //     console.log('Concat: ' + value);
+  //   }
+  //  );
+
+  $obs1
+    .merge($obs2) // Nao espera a primeira stream finalizar para executar a segunda
+    .subscribe(value => {
+      console.log('Merge: ' + value);
+    }
+    );
+}
+
+
+function httpRequestScenario() {
+
+  const ENDPOINT = 'users';
+  const ROOT = 'https://jsonplaceholder.typicode.com';
+
+  const makeRequest = function makeRequest(path) {
+    return new Promise(function (resolve, reject) {
+      request(path, function (err, response, body) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(JSON.parse(body)); // parse response body to JSON, otherwise mapping operation bellow fails
+        }
+      })
+    });
+  };
+
+
+  const $obs = Rx.Observable.fromPromise(makeRequest(ROOT + '/' + ENDPOINT));
+
+  $obs.
+    flatMap(users => users). // for each object emmit a observable
+    map((user) => user.website). //get only website data
+    filter((website) => (website.endsWith('net') || website.endsWith('org'))). //do some filtering
+    reduce((data, website) => { // So retorna quando o source Observable completa a execução. primeiro parametro é o acumulador
+      return {
+        count: data.count += 1,
+        name_length: data.name_length += website.length
+      }
+    }, { count: 0, name_length: 0 }).
+    subscribe(result => {
+      const average_length = result.name_length / result.count;
+      console.log('average length: ' + average_length);
+    }
+    );
+
+  $obs.
+    flatMap(users => users).
+    map((user) => user.website).
+    filter((website => (website.endsWith('net') || website.endsWith('org')))).
+    scan((data, website) => { // Mostra o resultado para cada site, acumulando no primeiro parâmetro 'data'
+      return {
+        website,
+        count: data.count += 1,
+        name_length: data.name_length += website.length
+      }
+    }, { count: 0, name_length: 0 }).
+    //take(2). //limita a quantidade de resultados
+    takeWhile((result) => result.count < 3). // retorna resultados quando uma condição é satisfeita
+    subscribe(partialResult => {
+      const average_length = partialResult.name_length / partialResult.count;
+      console.log('website: ' + partialResult.website + ' average length (' + partialResult.count + '): ' + average_length);
+    });
+}
 
 module.exports.switchMapSample = switchMapSample;
 module.exports.forkJoinSample = forkJoinSample;
 module.exports.concatAllSample = concatAllSample;
 module.exports.mergeAllSample = mergeAllSample;
+module.exports.concatSample = concatSample;
+module.exports.httpRequestScenario = httpRequestScenario;
+module.exports.zipSample = zipSample;
+module.exports.minSample = minSample;
+module.exports.pluckSample = pluckSample;
