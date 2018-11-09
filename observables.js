@@ -2,7 +2,26 @@
 const Rx = require('rxjs/Rx');
 const request = require('request');
 const { timer, interval, forkJoin, of, Observable, concat, merge, from } = require('rxjs');
-const { switchMap, mergeMap, flatMap, delay, take, concatAll, map, mergeAll, tap, pluck, toArray, filter } = require('rxjs/operators');
+const { 
+      switchMap, 
+      mergeMap, 
+      flatMap, 
+      delay, 
+      take, 
+      concatAll, 
+      map, 
+      mergeAll, 
+      tap, 
+      pluck, 
+      toArray, 
+      filter,
+      bufferCount,
+      window,
+      scan, 
+      debounce,
+      debounceTime,
+      publish
+    } = require('rxjs/operators');
 
 
 
@@ -235,6 +254,84 @@ function httpRequestScenario() {
     });
 }
 
+function bufferCountSample() {
+  const source = interval(1000)
+    .bufferCount(3)
+    .subscribe(x => console.log(x));
+}
+
+function exhaustMapSample() {
+
+  const obs1$ = interval(2000).take(5);
+  const obs2$ = interval(1000).take(5);
+
+  const res$ = obs1$.exhaustMap((x) => obs2$);
+
+  res$.subscribe((x) => console.log(x));
+
+
+}
+
+function windowSample() {
+  
+  const source = timer(0, 1000);
+
+  const example = source.pipe(window(interval(3000)));
+
+  const count = example.pipe(
+    scan((acc, curr) => acc + 1, 0)
+  );
+
+  const subscribe  = count.subscribe(val => console.log(`Window ${val}:`));
+  const subscribeTwo = example
+    .pipe(mergeAll())
+    .subscribe(val => console.log(val));
+}
+
+
+function debounceSample() {
+
+  const example = of('WAIT', 'ONE', 'SECOND', 'Last will display');
+
+  const debounceExample = example
+    .pipe(
+      debounceTime(5000)
+      // debounce(() => timer(1000))
+    )
+    .subscribe(val => console.log(val));
+}
+
+
+function publishSample() {
+
+  const source = interval(1000);
+
+  const example = source
+    .pipe(
+      tap(_ => console.log('Do something')),
+
+      publish()
+
+    );
+
+  const subscribe = example.subscribe(val => 
+    console.log(`Subscriber One: ${val}`) 
+  );
+  
+
+  const subscribeTwo = example.subscribe(val => 
+    console.log(`Subscriber Two: ${val}`)
+  );
+
+  setTimeout(() => {
+     example.connect();
+  }, 5000);
+
+
+}
+
+
+
 module.exports.switchMapSample = switchMapSample;
 module.exports.forkJoinSample = forkJoinSample;
 module.exports.concatAllSample = concatAllSample;
@@ -244,3 +341,8 @@ module.exports.httpRequestScenario = httpRequestScenario;
 module.exports.zipSample = zipSample;
 module.exports.minSample = minSample;
 module.exports.pluckSample = pluckSample;
+module.exports.bufferCountSample = bufferCountSample;
+module.exports.exhaustMapSample = exhaustMapSample;
+module.exports.windowSample = windowSample;
+module.exports.debounceSample = debounceSample;
+module.exports.publishSample = publishSample;

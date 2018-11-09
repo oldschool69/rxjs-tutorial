@@ -16,7 +16,12 @@ const functional = require('./functional');
 // functional.reduceSample();
 // observables.zipSample();
 // observables.minSample();
-observables.pluckSample();
+// observables.pluckSample();
+// observables.bufferCountSample();
+// observables.exhaustMapSample();
+// observables.windowSample();
+// observables.debounceSample();
+observables.publishSample();
 
 
 
