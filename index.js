@@ -21,7 +21,11 @@ const functional = require('./functional');
 // observables.exhaustMapSample();
 // observables.windowSample();
 // observables.debounceSample();
-observables.publishSample();
+// observables.publishSample();
+// functional.higherOrderFunctionsSample();
+// functional.customHigherOrderFunctionSample();
+// functional.closureSample();
+functional.decoratorSample();
 
 
 
