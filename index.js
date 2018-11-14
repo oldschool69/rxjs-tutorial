@@ -4,6 +4,7 @@
 // Real life applications for Observables on web development
 const observables = require('./observables');
 const functional = require('./functional');
+const javascript_fundamentals = require('./javascript_fundamentals')
 
 // more observable samples:
 
@@ -25,7 +26,9 @@ const functional = require('./functional');
 // functional.higherOrderFunctionsSample();
 // functional.customHigherOrderFunctionSample();
 // functional.closureSample();
-functional.decoratorSample();
+// functional.decoratorSample();
+// javascript_fundamentals.scopeSample();
+javascript_fundamentals.prototypeSample();
 
 
 
