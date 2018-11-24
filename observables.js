@@ -326,6 +326,58 @@ function publishSample() {
   setTimeout(() => {
      example.connect();
   }, 5000);
+}
+
+function fetch(callerId) {
+
+  return Rx.Observable.create((observer) => {
+    let value = 0;
+    
+    const interval = setInterval(() => {
+      if(value % 2 === 0) {
+        observer.next(`***${callerId} => ${value}`);
+      }
+      value++;
+      if(value === 12) {
+        clearInterval(interval);
+        observer.error("limit achieved");
+      }
+    }, 1000); 
+  }).retryWhen((errors) => {
+    console.log(`Errors on ${callerId}, retry`);
+    // return errors.delay(1000).take(2);
+    return errors.delay(1000).take(2).concat(Rx.Observable.throw(`***${callerId} number of tries expired!!!`));
+  });
+
+}
+
+
+function retryWhenSample() {
+
+  setTimeout(() => {
+    const obs1 = fetch("obs 1")
+      .subscribe((val) => {
+        console.log(val);
+      },
+      (error) => {
+        console.log("obs 1 error: ", error);
+      },
+      () => {
+        console.log("obs 1 completed");
+      }); 
+  }, 2000);
+
+  setTimeout(() => {
+    const obs2 = fetch("obs 2")
+      .subscribe((val) => {
+        console.log(val);
+      },
+      (error) => {
+        console.log("obs 2 error: ", error);
+      },() => {
+        console.log("obs 2 completed");
+      }); 
+  }, 10000);
 
 
 }
@@ -346,3 +398,4 @@ module.exports.exhaustMapSample = exhaustMapSample;
 module.exports.windowSample = windowSample;
 module.exports.debounceSample = debounceSample;
 module.exports.publishSample = publishSample;
+module.exports.retryWhenSample = retryWhenSample;

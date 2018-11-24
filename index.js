@@ -28,7 +28,8 @@ const javascript_fundamentals = require('./javascript_fundamentals')
 // functional.closureSample();
 // functional.decoratorSample();
 // javascript_fundamentals.scopeSample();
-javascript_fundamentals.prototypeSample();
+//javascript_fundamentals.prototypeSample();
+observables.retryWhenSample();
 
 
 
