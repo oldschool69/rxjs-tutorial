@@ -2,26 +2,26 @@
 const Rx = require('rxjs/Rx');
 const request = require('request');
 const { timer, interval, forkJoin, of, Observable, concat, merge, from } = require('rxjs');
-const { 
-      switchMap, 
-      mergeMap, 
-      flatMap, 
-      delay, 
-      take, 
-      concatAll, 
-      map, 
-      mergeAll, 
-      tap, 
-      pluck, 
-      toArray, 
-      filter,
-      bufferCount,
-      window,
-      scan, 
-      debounce,
-      debounceTime,
-      publish
-    } = require('rxjs/operators');
+const {
+  switchMap,
+  mergeMap,
+  flatMap,
+  delay,
+  take,
+  concatAll,
+  map,
+  mergeAll,
+  tap,
+  pluck,
+  toArray,
+  filter,
+  bufferCount,
+  window,
+  scan,
+  debounce,
+  debounceTime,
+  publish
+} = require('rxjs/operators');
 
 
 
@@ -29,21 +29,21 @@ function zipSample() {
 
   let age$ = Observable.of(27, 25, 29);
   let name$ = Observable.of('Foo', 'Bar', 'Beer');
-  let isDev$ = Observable.of(true, true, false); 
+  let isDev$ = Observable.of(true, true, false);
 
-  Observable.zip(age$, 
-                 name$,
-                 isDev$, 
-                 (age, name, isDev) => ({age, name, isDev}))
-             .subscribe(x => console.log(x));
+  Observable.zip(age$,
+    name$,
+    isDev$,
+    (age, name, isDev) => ({ age, name, isDev }))
+    .subscribe(x => console.log(x));
 }
 
 function pluckSample() {
 
   const source$ = Observable.from([
-    { name: 'Joe', age: 30, job: { title: 'Developer', language: 'Javascript' } }, 
+    { name: 'Joe', age: 30, job: { title: 'Developer', language: 'Javascript' } },
     { name: 'Sarah', age: 35, job: { title: 'Developer', language: 'C++' } },
-    { name: 'Carlos', age: 28, job: { title: 'Designer', language: 'Photo Shop 3' }  }
+    { name: 'Carlos', age: 28, job: { title: 'Designer', language: 'Photo Shop 3' } }
   ]);
 
   source$
@@ -55,7 +55,7 @@ function pluckSample() {
     .pluck('job', 'language')
     .toArray()
     .subscribe(language => console.log(language));
- 
+
 }
 
 
@@ -66,11 +66,11 @@ function minSample() {
 
 
   // Usign a more complex data type  
-  Observable.of({age: 7, name: 'Foo'},
-                {age: 5, name: 'Bar'},
-                {age: 9, name: 'Beer'})
-            .min((person1, person2) => person1.age < person2.age ? -1 : 1)
-            .subscribe((person) => console.log(person.name));  
+  Observable.of({ age: 7, name: 'Foo' },
+    { age: 5, name: 'Bar' },
+    { age: 9, name: 'Beer' })
+    .min((person1, person2) => person1.age < person2.age ? -1 : 1)
+    .subscribe((person) => console.log(person.name));
 }
 
 
@@ -273,7 +273,7 @@ function exhaustMapSample() {
 }
 
 function windowSample() {
-  
+
   const source = timer(0, 1000);
 
   const example = source.pipe(window(interval(3000)));
@@ -282,7 +282,7 @@ function windowSample() {
     scan((acc, curr) => acc + 1, 0)
   );
 
-  const subscribe  = count.subscribe(val => console.log(`Window ${val}:`));
+  const subscribe = count.subscribe(val => console.log(`Window ${val}:`));
   const subscribeTwo = example
     .pipe(mergeAll())
     .subscribe(val => console.log(val));
@@ -314,17 +314,17 @@ function publishSample() {
 
     );
 
-  const subscribe = example.subscribe(val => 
-    console.log(`Subscriber One: ${val}`) 
+  const subscribe = example.subscribe(val =>
+    console.log(`Subscriber One: ${val}`)
   );
-  
 
-  const subscribeTwo = example.subscribe(val => 
+
+  const subscribeTwo = example.subscribe(val =>
     console.log(`Subscriber Two: ${val}`)
   );
 
   setTimeout(() => {
-     example.connect();
+    example.connect();
   }, 5000);
 }
 
@@ -332,21 +332,21 @@ function fetch(callerId) {
 
   return Rx.Observable.create((observer) => {
     let value = 0;
-    
+
     const interval = setInterval(() => {
-      if(value % 2 === 0) {
+      if (value % 2 === 0) {
         observer.next(`***${callerId} => ${value}`);
       }
       value++;
-      if(value === 12) {
+      if (value === 12) {
         clearInterval(interval);
         observer.error("limit achieved");
       }
-    }, 1000); 
+    }, 1000);
   }).retryWhen((errors) => {
     console.log(`Errors on ${callerId}, retry`);
     // return errors.delay(1000).take(2);
-    return errors.delay(1000).take(2).concat(Rx.Observable.throw(`***${callerId} number of tries expired!!!`));
+    return errors.delay(1000).take(2).concat(Rx.Observable.throw(new Error(`***${callerId} number of tries expired!!!`)));
   });
 
 }
@@ -359,12 +359,12 @@ function retryWhenSample() {
       .subscribe((val) => {
         console.log(val);
       },
-      (error) => {
-        console.log("obs 1 error: ", error);
-      },
-      () => {
-        console.log("obs 1 completed");
-      }); 
+        (error) => {
+          console.log("obs 1 error: ", error);
+        },
+        () => {
+          console.log("obs 1 completed");
+        });
   }, 2000);
 
   setTimeout(() => {
@@ -372,11 +372,11 @@ function retryWhenSample() {
       .subscribe((val) => {
         console.log(val);
       },
-      (error) => {
-        console.log("obs 2 error: ", error);
-      },() => {
-        console.log("obs 2 completed");
-      }); 
+        (error) => {
+          console.log("obs 2 error: ", error);
+        }, () => {
+          console.log("obs 2 completed");
+        });
   }, 10000);
 
 

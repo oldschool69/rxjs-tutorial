@@ -13,7 +13,7 @@ const javascript_fundamentals = require('./javascript_fundamentals')
 // observables.concatAllSample();
 // observables.mergeAllSample();
 // observables.concatSample();
-// observables.httpRequestScenario();
+observables.httpRequestScenario();
 // functional.reduceSample();
 // observables.zipSample();
 // observables.minSample();
@@ -29,7 +29,7 @@ const javascript_fundamentals = require('./javascript_fundamentals')
 // functional.decoratorSample();
 // javascript_fundamentals.scopeSample();
 //javascript_fundamentals.prototypeSample();
-observables.retryWhenSample();
+// observables.retryWhenSample();
 
 
 
