@@ -119,17 +119,37 @@ function forkJoinSample() {
 
 }
 
+function changeValue(val) {
+  return Observable.from(val)
+    .map((x)=> { 
+      return x * 10 
+    });
+    //.take(1); //o take na funcao de retorno que ta fodendo
+}
+
 function concatAllSample() {
 
-  const source = interval(2000);
+  const source = Observable.of([1, 2, 3, 4, 5]);
 
-  const sample = source
-    .pipe(
-      map(val => of(val + 10)),
-      concatAll()
-    );
+  source
+  .flatMap(x => source.pipe(
+    map((x) => {
+      return changeValue(x);
+    }),
+   ))
+  .mergeAll(10) //para usar os operadores mergeAll e concatAll tem retornar um stream usando o operador pipe
+  //.concatAll()
+  .subscribe((val) => { 
+    console.log("val: ", val);
+  }, 
+  (err) => {
+    console.log(err); 
+  },
+  () => {
+    console.log("done!");
+  });
 
-  sample.subscribe(val => console.log('concatAllSample: ', val));
+  console.log("end");
 
 }
 
