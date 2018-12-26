@@ -10,7 +10,7 @@ const javascript_fundamentals = require('./javascript_fundamentals')
 
 // observables.switchMapSample();
 // observables.forkJoinSample();
-observables.concatAllSample();
+// observables.concatAllSample();
 // observables.mergeAllSample();
 // observables.concatSample();
 // observables.httpRequestScenario();
@@ -30,6 +30,8 @@ observables.concatAllSample();
 // javascript_fundamentals.scopeSample();
 //javascript_fundamentals.prototypeSample();
 // observables.retryWhenSample();
+observables.requestsInParallel();
+observables.requestsInParallel_v2();
 
 
 
