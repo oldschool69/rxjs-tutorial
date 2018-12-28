@@ -351,7 +351,7 @@ function makeRequestInParallel(path) {
 		});
 	});
 
-	return Observable.fromPromise(promise);
+	return Observable.fromPromise(promise).take(1);
 }
 
 function requestsInParallel() {
@@ -408,36 +408,49 @@ function requestsInParallel() {
 
 function requestsInParallel_v2() {
   
-  const sitesMap = { 'https://google.com': {}, 'http://facebook.com': {}, 'https://santander.com.br': {},  
-  'https://google.com': {}, 'http://facebook.com': {}, 'https://santander.com.br': {},
-  'https://google.com': {}, 'http://facebook.com': {}, 'https://santander.com.br': {},
-  'https://google.com': {}, 'http://facebook.com': {}, 'https://santander.com.br': {},
-  'https://google.com': {}, 'http://facebook.com': {}, 'https://santander.com.br': {},
-  'https://google.com': {}, 'http://facebook.com': {}, 'https://santander.com.br': {} };
+  const sitesMap = { 'https://google.com': {}, 'http://facebook.com': {}, 'https://santander.com.br': {} };
 
 	const sites = _.keys(sitesMap);
 
 	const sitesObs = Observable.of(sites);
 
-  const t0 = performance.now();
+	const t0 = performance.now();
+	
+	const skus = ['SKU_1', 'SKU_2', 'SKU_3'];
+
+	const executions = [];
 
 	sitesObs
 		.flatMap((sites) => sites)
-		.concatMap((site) => {
-      // console.log(site);
-      return Observable.forkJoin(makeRequestInParallel(site));
-    })
-    .flatMap(response => response)
+		.flatMap((site) => {
+			console.log(site);
+			skus.forEach(sku => {
+				executions.push(makeRequestInParallel(site));
+			})
+			return skus;
+		})
 		.subscribe(
-			(response) => {
-				// console.log(response.statusCode);
+			(skus) => {
+				console.log(skus);
 			},
 			(error) => {
-				// console.log(error);
+				console.log(error);
 			},
 			() => {
         const t1 = performance.now();
-        console.log("done v2 in " + (t1 - t0) + " milliseconds.")
+				console.log("done v2 in " + (t1 - t0) + " milliseconds.");
+				console.log(executions);
+				Observable.forkJoin(executions)
+					.flatMap(response => response)
+					.subscribe(response => {
+						console.log(response.statusCode);
+					},
+					(error) => {
+						console.log(error);
+					},
+					() => {
+						console.log("Done!");
+					})
       }
 		);
 }

@@ -30,7 +30,7 @@ const javascript_fundamentals = require('./javascript_fundamentals')
 // javascript_fundamentals.scopeSample();
 //javascript_fundamentals.prototypeSample();
 // observables.retryWhenSample();
-observables.requestsInParallel();
+// observables.requestsInParallel();
 observables.requestsInParallel_v2();
 
 
