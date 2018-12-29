@@ -437,9 +437,7 @@ function requestsInParallel_v2() {
 				console.log(error);
 			},
 			() => {
-        const t1 = performance.now();
-				console.log("done v2 in " + (t1 - t0) + " milliseconds.");
-				console.log(executions);
+				//console.log(executions);
 				Observable.forkJoin(executions)
 					.flatMap(response => response)
 					.subscribe(response => {
@@ -449,7 +447,8 @@ function requestsInParallel_v2() {
 						console.log(error);
 					},
 					() => {
-						console.log("Done!");
+						const t1 = performance.now();
+						console.log("done v2 in " + (t1 - t0) + " milliseconds.");
 					})
       }
 		);
